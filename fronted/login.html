@@ -1,17 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
 <title>Login</title>
 <link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body style="justify-content:center;align-items:center;height:100vh;">
 
 <div class="card" style="width:400px;">
 <h2>Iniciar Sesión</h2>
 <form onsubmit="loginUser(event)">
-<input type="email" id="email" placeholder="Correo" required>
-<input type="password" id="password" placeholder="Contraseña" required>
-<button type="submit">Ingresar</button>
+
+<div class="input-group">
+    <i class="fa-solid fa-envelope"></i>
+    <input type="email" id="email" placeholder="Correo electrónico" required>
+</div>
+
+<div class="input-group">
+    <i class="fa-solid fa-lock"></i>
+    <input type="password" id="password" placeholder="Contraseña" required>
+    <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+</div>
+
+<button class="btn-login" type="submit">Ingresar</button>
 </form>
 <p>¿No tienes cuenta? <a href="register.html">Registrarse</a></p>
 </div>

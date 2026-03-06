@@ -23,6 +23,24 @@ async function loginUser(e){
     }
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener("click", function () {
+
+            const type = passwordInput.type === "password" ? "text" : "password";
+            passwordInput.type = type;
+
+            this.classList.toggle("fa-eye");
+            this.classList.toggle("fa-eye-slash");
+        });
+    }
+
+});
+
 /* REGISTER */
 async function registerUser(e){
     e.preventDefault();
