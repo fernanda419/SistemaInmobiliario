@@ -1,49 +1,798 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<title>Lotes</title>
-<link rel="stylesheet" href="assets/css/styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inmosystem - Detalle del Lote</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:   #1a3a2a;
+      --green-mid:    #2d6a4f;
+      --green-accent: #3a9e6f;
+      --green-light:  #52b788;
+      --cream:        #f5f0e8;
+      --cream-dark:   #ede8dc;
+      --text-dark:    #1c2b22;
+      --text-muted:   #5a6e5e;
+      --white:        #ffffff;
+      --shadow:       0 4px 24px rgba(0,0,0,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 68px;
+      background: rgba(245,240,232,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(42,106,79,0.12);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #1a3a2a;}
+    .logo-icon { font-size: 1.4rem; }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: var(--green-dark); letter-spacing: 0.02em; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.92rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--green-accent); }
+    .nav-actions { display: flex; align-items: center; gap: 16px; }
+    .btn-link { text-decoration: none; color: var(--text-dark); font-size: 0.92rem; font-weight: 500; }
+    .btn-link:hover { color: var(--green-accent); }
+    .btn-primary {
+      display: inline-block; background: var(--green-accent); color: var(--white);
+      text-decoration: none; padding: 9px 22px; border-radius: 6px;
+      font-size: 0.92rem; font-weight: 600; transition: background 0.2s, transform 0.15s;
+      border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    }
+    .btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); }
+
+    /* ── VISTA LISTA (por defecto) ── */
+    #vista-lista { display: block; padding-top: 68px; }
+    #vista-detalle { display: none; padding-top: 68px; }
+
+    /* HERO LISTA */
+    .lista-hero {
+      background: var(--green-dark);
+      padding: 64px 60px 52px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .lista-hero::before {
+      content: '';
+      position: absolute; top: -80px; right: -80px;
+      width: 320px; height: 320px; border-radius: 50%;
+      background: rgba(82,183,136,0.07);
+    }
+    .lista-hero::after {
+      content: '';
+      position: absolute; bottom: -60px; left: -60px;
+      width: 220px; height: 220px; border-radius: 50%;
+      background: rgba(82,183,136,0.05);
+    }
+    .lista-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 900;
+      color: var(--white); margin-bottom: 12px;
+      position: relative; z-index: 1;
+    }
+    .lista-hero p {
+      color: rgba(255,255,255,0.65); font-size: 1rem;
+      font-weight: 300; position: relative; z-index: 1;
+    }
+
+    /* FILTROS */
+    .filtros {
+      display: flex; gap: 10px; justify-content: center;
+      padding: 28px 60px; flex-wrap: wrap;
+      background: var(--cream-dark);
+      border-bottom: 1px solid rgba(42,106,79,0.08);
+    }
+    .filtro-btn {
+      padding: 8px 20px; border-radius: 999px;
+      border: 1.5px solid rgba(42,106,79,0.2);
+      background: var(--white); color: var(--text-muted);
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .filtro-btn:hover, .filtro-btn.active {
+      background: var(--green-accent); color: var(--white);
+      border-color: var(--green-accent);
+    }
+
+    /* GRID DE LOTES */
+    .lotes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+      max-width: 1100px;
+      margin: 52px auto;
+      padding: 0 60px;
+    }
+    .lote-card {
+      background: var(--white); border-radius: 16px;
+      border: 1.5px solid rgba(42,106,79,0.1);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    }
+    .lote-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.13);
+      border-color: var(--green-accent);
+    }
+    .lote-card-img {
+      height: 200px; overflow: hidden; position: relative;
+    }
+    .lote-card-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.5s;
+    }
+    .lote-card:hover .lote-card-img img { transform: scale(1.06); }
+    .lote-card-img-badge {
+      position: absolute; top: 14px; left: 14px;
+      background: var(--green-accent); color: white;
+      padding: 5px 14px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .lote-card-body { padding: 24px 26px 28px; }
+    .lote-card-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .lote-card-icon { font-size: 1.3rem; }
+    .lote-card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem; font-weight: 700; color: var(--green-dark);
+    }
+    .lote-specs { list-style: none; margin-bottom: 18px; }
+    .lote-specs li {
+      display: flex; justify-content: space-between;
+      font-size: 0.88rem; color: var(--text-muted);
+      padding: 6px 0; border-bottom: 1px solid rgba(42,106,79,0.07);
+    }
+    .lote-specs li:last-child { border-bottom: none; }
+    .lote-specs li strong { color: var(--text-dark); font-weight: 600; }
+    .lote-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 4px;
+    }
+    .lote-price { font-size: 1.1rem; font-weight: 700; color: var(--green-accent); }
+    .lote-ver {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.85rem; font-weight: 600; color: var(--green-mid);
+      transition: gap 0.2s;
+    }
+    .lote-card:hover .lote-ver { gap: 10px; }
+
+    /* ── VISTA DETALLE ── */
+    /* GALERÍA */
+    .det-gallery {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: 300px 220px;
+      gap: 4px;
+    }
+    .det-gallery-main { grid-row: 1 / 3; position: relative; overflow: hidden; }
+    .det-gallery-main img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .det-gallery-main:hover img { transform: scale(1.03); }
+    .det-gallery-thumb { position: relative; overflow: hidden; cursor: pointer; }
+    .det-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+    .det-gallery-thumb:hover img { transform: scale(1.05); }
+    .det-gallery-dim {
+      position: absolute; inset: 0;
+      background: rgba(26,58,42,0.35);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .det-gallery-thumb:hover .det-gallery-dim { opacity: 1; }
+    .det-gallery-dim span { color: white; font-size: 0.85rem; font-weight: 600; }
+    .det-gallery-badge {
+      position: absolute; top: 22px; left: 22px; z-index: 2;
+      background: var(--green-accent); color: white;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+
+    /* BREADCRUMB */
+    .breadcrumb {
+      padding: 14px 60px;
+      font-size: 0.82rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 8px;
+      background: var(--cream-dark);
+      border-bottom: 1px solid rgba(42,106,79,0.08);
+    }
+    .breadcrumb a { color: var(--green-accent); text-decoration: none; cursor: pointer; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    /* CONTENIDO DETALLE */
+    .det-wrap { max-width: 1100px; margin: 0 auto; padding: 52px 60px; }
+
+    .det-header { margin-bottom: 40px; }
+    .det-tag {
+      display: inline-block;
+      background: rgba(58,158,111,0.1); color: var(--green-accent);
+      border: 1px solid rgba(58,158,111,0.25);
+      border-radius: 999px; padding: 5px 14px;
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .det-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 900; color: var(--text-dark);
+      line-height: 1.1; margin-bottom: 12px;
+    }
+    .det-subtitle { font-size: 1rem; color: var(--text-muted); font-weight: 300; line-height: 1.8; max-width: 680px; }
+
+    /* STATS */
+    .det-stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; margin: 36px 0;
+    }
+    .stat-box {
+      background: var(--white); border-radius: 12px;
+      padding: 22px 16px; text-align: center;
+      border: 1px solid rgba(42,106,79,0.1); box-shadow: var(--shadow);
+      transition: transform 0.2s;
+    }
+    .stat-box:hover { transform: translateY(-3px); }
+    .stat-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 900; color: var(--green-dark); margin-bottom: 4px; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    /* DESCRIPCIÓN */
+    .section-block { margin-bottom: 52px; }
+    .section-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-weight: 900; color: var(--text-dark);
+      margin-bottom: 20px; padding-bottom: 12px;
+      border-bottom: 2px solid rgba(42,106,79,0.1);
+    }
+    .det-desc { font-size: 0.97rem; color: var(--text-muted); line-height: 1.85; max-width: 760px; }
+
+    /* CARACTERÍSTICAS */
+    .caract-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    }
+    .caract-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--white); border-radius: 10px;
+      padding: 16px 18px;
+      border: 1px solid rgba(42,106,79,0.1); box-shadow: var(--shadow);
+    }
+    .caract-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .caract-text { font-size: 0.88rem; color: var(--text-dark); font-weight: 500; line-height: 1.4; }
+    .caract-text span { display: block; font-size: 0.78rem; color: var(--text-muted); font-weight: 400; }
+
+    /* ETAPAS */
+    .etapas-timeline {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; position: relative;
+    }
+    .etapas-timeline::before {
+      content: ''; position: absolute;
+      top: 36px; left: 10%; right: 10%; height: 2px;
+      background: linear-gradient(to right, var(--green-accent), var(--green-light));
+      z-index: 0;
+    }
+    .etapa-item { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 12px; position: relative; z-index: 1; }
+    .etapa-circle {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--white); border: 3px solid var(--green-accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(58,158,111,0.2);
+      transition: transform 0.2s;
+    }
+    .etapa-item:hover .etapa-circle { transform: scale(1.1); }
+    .etapa-circle.active { background: var(--green-accent); }
+    .etapa-num {
+      position: absolute; top: -6px; right: calc(50% - 42px);
+      background: var(--green-dark); color: white;
+      width: 20px; height: 20px; border-radius: 50%;
+      font-size: 0.65rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .etapa-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--green-dark); margin-bottom: 6px; }
+    .etapa-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+    .etapa-status { margin-top: 8px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--green-accent); }
+    .etapa-status.pending { color: #b0bdb5; }
+
+    /* CTA */
+    .cta-section {
+      background: var(--green-dark); border-radius: 20px;
+      padding: 52px 60px; text-align: center;
+      margin-bottom: 56px; position: relative; overflow: hidden;
+    }
+    .cta-section::before { content: ''; position: absolute; top: -60px; right: -60px; width: 260px; height: 260px; border-radius: 50%; background: rgba(82,183,136,0.08); }
+    .cta-section::after { content: ''; position: absolute; bottom: -40px; left: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(82,183,136,0.06); }
+    .cta-section h2 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--white); margin-bottom: 12px; position: relative; z-index: 1; }
+    .cta-section p { color: rgba(255,255,255,0.65); font-size: 1rem; font-weight: 300; margin-bottom: 28px; position: relative; z-index: 1; }
+    .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+    .btn-cta-white { display: inline-block; background: var(--white); color: var(--green-dark); padding: 13px 32px; border-radius: 8px; font-size: 1rem; font-weight: 700; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-cta-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .btn-cta-outline { display: inline-block; border: 2px solid rgba(255,255,255,0.4); color: var(--white); padding: 13px 32px; border-radius: 8px; font-size: 1rem; font-weight: 600; text-decoration: none; transition: border-color 0.2s, background 0.2s; cursor: pointer; background: transparent; font-family: 'DM Sans', sans-serif; }
+    .btn-cta-outline:hover { border-color: white; background: rgba(255,255,255,0.08); }
+
+    /* FOOTER */
+    .footer { background: var(--green-dark); color: rgba(255,255,255,0.85); }
+    .footer-inner { display: grid; grid-template-columns: 2fr 1.5fr 1fr; gap: 48px; padding: 64px 60px 40px; max-width: 1200px; margin: 0 auto; }
+    .footer-brand .logo-text { color: var(--white); }
+    .footer-brand p { margin-top: 14px; font-size: 0.875rem; color: rgba(255,255,255,0.55); line-height: 1.7; max-width: 300px; }
+    .footer-col h5 { font-weight: 700; color: var(--white); margin-bottom: 16px; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.8rem; }
+    .footer-col p { font-size: 0.875rem; color: rgba(255,255,255,0.55); margin-bottom: 8px; }
+    .footer-col a { display: block; text-decoration: none; color: rgba(255,255,255,0.55); font-size: 0.875rem; margin-bottom: 8px; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--green-light); }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); text-align: center; padding: 20px; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeUp 0.6s ease both; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .det-stats { grid-template-columns: repeat(2, 1fr); }
+      .caract-grid { grid-template-columns: repeat(2, 1fr); }
+      .etapas-timeline { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      .etapas-timeline::before { display: none; }
+    }
+    @media (max-width: 768px) {
+      .navbar { padding: 0 20px; }
+      .nav-links { display: none; }
+      .lotes-grid { grid-template-columns: 1fr; padding: 0 20px; }
+      .lista-hero { padding: 48px 20px 36px; }
+      .filtros { padding: 20px; }
+      .det-gallery { grid-template-columns: 1fr; grid-template-rows: 260px 150px 150px; }
+      .det-gallery-main { grid-row: auto; }
+      .det-wrap { padding: 36px 20px; }
+      .breadcrumb { padding: 14px 20px; }
+      .caract-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; padding: 40px 24px 28px; gap: 32px; }
+      .cta-section { padding: 40px 20px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="sidebar">
-<h2>InmoSystem</h2>
-<a href="dashboard.html">Dashboard</a>
-<a href="lotes.html">Lotes</a>
-<a href="pagos.html">Pagos</a>
-<a href="pqrs.html">PQRS</a>
-</div>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-icon">🏛</span>
+      <span class="logo-text">Inmosystem</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#tipologias">Tipologías</a></li>
+      <li><a href="index.html#etapas">Etapas</a></li>
+      <li><a href="index.html#contacto">Contacto</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" class="btn-link">Ingresar</a>
+      <a href="registrar.html" class="btn-primary">Registrarse</a>
+    </div>
+  </nav>
 
-<div class="main">
-<h1>Lotes Disponibles</h1>
+  <!-- ══════════════════════════════
+       VISTA LISTA
+  ══════════════════════════════ -->
+  <div id="vista-lista">
 
-<div class="card">
-<select id="filtroEstado" onchange="filtrarLotes()">
-<option value="">Todos</option>
-<option value="Disponible">Disponible</option>
-<option value="Reservado">Reservado</option>
-<option value="Vendido">Vendido</option>
-</select>
-</div>
+    <div class="lista-hero">
+      <h1>Tipologías de Inmuebles</h1>
+      <p>Encuentra el espacio ideal para ti y tu familia</p>
+    </div>
 
-<div class="card">
-<table>
-<thead>
-<tr>
-<th>Área</th>
-<th>Ubicación</th>
-<th>Valor</th>
-<th>Estado</th>
-<th>Acción</th>
-</tr>
-</thead>
-<tbody id="tablaLotes"></tbody>
-</table>
-</div>
+    <div class="filtros">
+      <button class="filtro-btn active" onclick="filtrar('todos', this)">Todos</button>
+      <button class="filtro-btn" onclick="filtrar('1hab', this)">1 Habitación</button>
+      <button class="filtro-btn" onclick="filtrar('2hab', this)">2 Habitaciones</button>
+      <button class="filtro-btn" onclick="filtrar('pequeno', this)">Hasta 50 m²</button>
+      <button class="filtro-btn" onclick="filtrar('grande', this)">Más de 50 m²</button>
+    </div>
 
-</div>
+    <div class="lotes-grid">
 
-<script src="assets/js/app.js"></script>
-<script>cargarLotes();</script>
+      <div class="lote-card" data-hab="1" data-area="36" onclick="verDetalle('C')">
+        <div class="lote-card-img">
+          <span class="lote-card-img-badge">Disponible</span>
+          <img src="https://images.unsplash.com/photo-1554995207-c18c203602cb?w=600&q=80" alt="Tipo C" />
+        </div>
+        <div class="lote-card-body">
+          <div class="lote-card-header">
+            <span class="lote-card-icon">🏢</span>
+            <div class="lote-card-name">Apartamento Tipo C</div>
+          </div>
+          <ul class="lote-specs">
+            <li><span>Área</span><strong>36 m²</strong></li>
+            <li><span>Habitaciones</span><strong>1</strong></li>
+            <li><span>Baños</span><strong>1</strong></li>
+          </ul>
+          <div class="lote-card-footer">
+            <span class="lote-price">Desde $422'760.000</span>
+            <span class="lote-ver">Ver detalle →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lote-card" data-hab="2" data-area="72" onclick="verDetalle('E')">
+        <div class="lote-card-img">
+          <span class="lote-card-img-badge">Disponible</span>
+          <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&q=80" alt="Tipo E" />
+        </div>
+        <div class="lote-card-body">
+          <div class="lote-card-header">
+            <span class="lote-card-icon">🏢</span>
+            <div class="lote-card-name">Apartamento Tipo E</div>
+          </div>
+          <ul class="lote-specs">
+            <li><span>Área</span><strong>72.3 m²</strong></li>
+            <li><span>Habitaciones</span><strong>2</strong></li>
+            <li><span>Baños</span><strong>2</strong></li>
+          </ul>
+          <div class="lote-card-footer">
+            <span class="lote-price">Desde $739'066.800</span>
+            <span class="lote-ver">Ver detalle →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lote-card" data-hab="2" data-area="75" onclick="verDetalle('F')">
+        <div class="lote-card-img">
+          <span class="lote-card-img-badge">Disponible</span>
+          <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80" alt="Tipo F" />
+        </div>
+        <div class="lote-card-body">
+          <div class="lote-card-header">
+            <span class="lote-card-icon">🏢</span>
+            <div class="lote-card-name">Apartamento Tipo F</div>
+          </div>
+          <ul class="lote-specs">
+            <li><span>Área</span><strong>75.5 m²</strong></li>
+            <li><span>Habitaciones</span><strong>2</strong></li>
+            <li><span>Baños</span><strong>2</strong></li>
+          </ul>
+          <div class="lote-card-footer">
+            <span class="lote-price">Desde $766'831.000</span>
+            <span class="lote-ver">Ver detalle →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lote-card" data-hab="2" data-area="56" onclick="verDetalle('G')">
+        <div class="lote-card-img">
+          <span class="lote-card-img-badge">Últimas unidades</span>
+          <img src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=600&q=80" alt="Tipo G" />
+        </div>
+        <div class="lote-card-body">
+          <div class="lote-card-header">
+            <span class="lote-card-icon">🏢</span>
+            <div class="lote-card-name">Apartamento Tipo G</div>
+          </div>
+          <ul class="lote-specs">
+            <li><span>Área</span><strong>56.5 m²</strong></li>
+            <li><span>Habitaciones</span><strong>2</strong></li>
+            <li><span>Baños</span><strong>0</strong></li>
+          </ul>
+          <div class="lote-card-footer">
+            <span class="lote-price">Desde $610'820.000</span>
+            <span class="lote-ver">Ver detalle →</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════
+       VISTA DETALLE
+  ══════════════════════════════ -->
+  <div id="vista-detalle">
+
+    <!-- GALERÍA -->
+    <div class="det-gallery" id="det-gallery">
+      <div class="det-gallery-main">
+        <span class="det-gallery-badge" id="det-badge">En Preventa</span>
+        <img id="det-img-main" src="" alt="Principal" />
+      </div>
+      <div class="det-gallery-thumb">
+        <img id="det-img-t1" src="" alt="Vista 2" />
+        <div class="det-gallery-dim"><span>Ver galería</span></div>
+      </div>
+      <div class="det-gallery-thumb">
+        <img id="det-img-t2" src="" alt="Vista 3" />
+        <div class="det-gallery-dim"><span>Ver galería</span></div>
+      </div>
+    </div>
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb">
+      <a href="index.html">Inicio</a>
+      <span>›</span>
+      <a onclick="volverLista()">Tipologías</a>
+      <span>›</span>
+      <span id="det-breadcrumb">Apartamento Tipo C</span>
+    </div>
+
+    <!-- CONTENIDO -->
+    <div class="det-wrap">
+
+      <div class="det-header fade-in">
+        <div class="det-tag" id="det-tag">🏙 Proyecto Águila · Barranquilla</div>
+        <h1 class="det-title" id="det-title">Apartamento Tipo C</h1>
+        <p class="det-subtitle" id="det-subtitle"></p>
+      </div>
+
+      <div class="det-stats fade-in" id="det-stats"></div>
+
+      <div class="section-block fade-in">
+        <h2 class="section-heading">Descripción</h2>
+        <p class="det-desc" id="det-desc"></p>
+      </div>
+
+      <div class="section-block fade-in">
+        <h2 class="section-heading">Características incluidas</h2>
+        <div class="caract-grid" id="det-caract"></div>
+      </div>
+
+      <div class="section-block fade-in">
+        <h2 class="section-heading">Etapas del Proyecto</h2>
+        <div class="etapas-timeline">
+          <div class="etapa-item">
+            <div style="position:relative;">
+              <div class="etapa-circle active">🚀</div>
+              <div class="etapa-num">1</div>
+            </div>
+            <div class="etapa-title">Lanzamiento</div>
+            <div class="etapa-desc">Presentación oficial con precios de preventa exclusivos.</div>
+            <div class="etapa-status">✓ Completado</div>
+          </div>
+          <div class="etapa-item">
+            <div style="position:relative;">
+              <div class="etapa-circle active">📋</div>
+              <div class="etapa-num">2</div>
+            </div>
+            <div class="etapa-title">Preventa</div>
+            <div class="etapa-desc">Reserva tu lote con las mejores condiciones de financiamiento.</div>
+            <div class="etapa-status">⚡ En curso</div>
+          </div>
+          <div class="etapa-item">
+            <div style="position:relative;">
+              <div class="etapa-circle">🏗</div>
+              <div class="etapa-num">3</div>
+            </div>
+            <div class="etapa-title">Construcción</div>
+            <div class="etapa-desc">Desarrollo de infraestructura vial, redes y zonas comunes.</div>
+            <div class="etapa-status pending">Próximamente</div>
+          </div>
+          <div class="etapa-item">
+            <div style="position:relative;">
+              <div class="etapa-circle">🏠</div>
+              <div class="etapa-num">4</div>
+            </div>
+            <div class="etapa-title">Entrega</div>
+            <div class="etapa-desc">Escrituración y entrega formal del lote al propietario.</div>
+            <div class="etapa-status pending">Próximamente</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-section fade-in">
+        <h2>¿Te interesa este apartamento?</h2>
+        <p>Reserva ahora y aprovecha los precios de preventa. Cupos limitados disponibles.</p>
+        <div class="cta-btns">
+          <a href="registrar.html" class="btn-cta-white">Reservar este lote →</a>
+          <button class="btn-cta-outline" onclick="volverLista()">← Ver otras tipologías</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <span class="logo-icon">🏛</span>
+          <span class="logo-text">Inmosystem</span>
+        </div>
+        <p>Tu aliado en la compra de lotes de terreno para vivienda. Construye tu futuro con nosotros.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Contacto</h5>
+        <p>📞 +57 300 123 4567</p>
+        <p>✉ info@inmosystem.com</p>
+        <p>📍 Bogotá, Colombia</p>
+      </div>
+      <div class="footer-col">
+        <h5>Enlaces</h5>
+        <a href="login.html">Iniciar Sesión</a>
+        <a href="registrar.html">Registrarse</a>
+        <a href="index.html#tipologias">Tipologías</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Inmosystem. Todos los derechos reservados.</div>
+  </footer>
+
+  <script>
+    // ── DATOS DE CADA TIPOLOGÍA ──────────────────────────────
+    const lotes = {
+      C: {
+        nombre: 'Apartamento Tipo C',
+        tag: '🏙 Proyecto Águila · Barranquilla',
+        badge: '🔥 En Preventa',
+        subtitulo: 'Ideal para personas que buscan un espacio funcional y moderno. El Tipo C maximiza cada metro cuadrado con una distribución inteligente, perfecta para solteros o parejas que desean iniciar su vida en propiedad.',
+        precio: "$422'760.000",
+        area: '36 m²',
+        hab: '1',
+        banos: '1',
+        piso: '2do al 6to',
+        descripcion: 'El Apartamento Tipo C es la opción de entrada más accesible del Proyecto Águila. Con 36 m² perfectamente distribuidos, cuenta con sala-comedor integrados, cocina semi-abierta, una habitación principal con closet y un baño completo. Ideal para primera vivienda o inversión en arriendo. Todos los acabados son de alta calidad e incluye planos habitacionales para adecuaciones futuras.',
+        imagenes: [
+          'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=1200&q=80',
+          'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80',
+          'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80'
+        ],
+        caracteristicas: [
+          { icon: '📐', titulo: '36 m² construidos', sub: 'Área total del inmueble' },
+          { icon: '🛏', titulo: '1 Habitación', sub: 'Con closet incluido' },
+          { icon: '🚿', titulo: '1 Baño completo', sub: 'Con ducha y lavamanos' },
+          { icon: '🍳', titulo: 'Cocina semi-abierta', sub: 'Con mesón en granito' },
+          { icon: '📜', titulo: 'Planos incluidos', sub: 'Sin costo adicional' },
+          { icon: '💳', titulo: 'Pago por cuotas', sub: 'Financiamiento flexible' }
+        ]
+      },
+      E: {
+        nombre: 'Apartamento Tipo E',
+        tag: '🏙 Proyecto Águila · Barranquilla',
+        badge: '✅ Disponible',
+        subtitulo: 'El Tipo E ofrece amplitud y confort para familias pequeñas. Con 72.3 m² bien distribuidos, dos habitaciones y dos baños completos, es la elección perfecta para quienes buscan espacio sin renunciar a la ubicación.',
+        precio: "$739'066.800",
+        area: '72.3 m²',
+        hab: '2',
+        banos: '2',
+        piso: '3ro al 8vo',
+        descripcion: 'El Apartamento Tipo E es una de las tipologías más solicitadas del Proyecto Águila. Sus 72.3 m² incluyen sala y comedor separados, cocina con zona de ropas, dos habitaciones amplias con closets y dos baños completos. La distribución permite una convivencia cómoda para familias con hijos. Los acabados premium y la iluminación natural hacen de este espacio un hogar excepcional.',
+        imagenes: [
+          'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=1200&q=80',
+          'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80',
+          'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=600&q=80'
+        ],
+        caracteristicas: [
+          { icon: '📐', titulo: '72.3 m² construidos', sub: 'Área total del inmueble' },
+          { icon: '🛏', titulo: '2 Habitaciones', sub: 'Ambas con closet' },
+          { icon: '🚿', titulo: '2 Baños completos', sub: 'Acabados en porcelanato' },
+          { icon: '🍳', titulo: 'Cocina + zona ropas', sub: 'Integrada y funcional' },
+          { icon: '🛋', titulo: 'Sala-comedor separados', sub: 'Mayor espacio familiar' },
+          { icon: '📜', titulo: 'Planos incluidos', sub: 'Sin costo adicional' }
+        ]
+      },
+      F: {
+        nombre: 'Apartamento Tipo F',
+        tag: '🏙 Proyecto Águila · Barranquilla',
+        badge: '✅ Disponible',
+        subtitulo: 'El Tipo F es la tipología más espaciosa del proyecto con 75.5 m². Diseñado para familias que valoran la comodidad y el espacio, con dos habitaciones, dos baños y una distribución que maximiza la ventilación e iluminación natural.',
+        precio: "$766'831.000",
+        area: '75.5 m²',
+        hab: '2',
+        banos: '2',
+        piso: '1ro al 10mo',
+        descripcion: 'Con 75.5 m², el Apartamento Tipo F es el más amplio del Proyecto Águila. Cuenta con sala, comedor y balcón integrados, cocina con isla, zona de ropas independiente, dos habitaciones con baño privado en la suite principal y un segundo baño social. La distribución abierta crea una sensación de amplitud excepcional. Ideal para familias que no quieren comprometer comodidad ni calidad.',
+        imagenes: [
+          'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=80',
+          'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80',
+          'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&q=80'
+        ],
+        caracteristicas: [
+          { icon: '📐', titulo: '75.5 m² construidos', sub: 'La tipología más amplia' },
+          { icon: '🛏', titulo: '2 Habitaciones', sub: 'Suite con baño privado' },
+          { icon: '🚿', titulo: '2 Baños', sub: 'Suite + baño social' },
+          { icon: '🏗', titulo: 'Balcón incluido', sub: 'Vista al proyecto' },
+          { icon: '🍳', titulo: 'Cocina con isla', sub: 'Diseño gourmet' },
+          { icon: '🧺', titulo: 'Zona de ropas', sub: 'Independiente y cubierta' }
+        ]
+      },
+      G: {
+        nombre: 'Apartamento Tipo G',
+        tag: '🏙 Proyecto Águila · Barranquilla',
+        badge: '⚠️ Últimas unidades',
+        subtitulo: 'El Tipo G es una oportunidad única de inversión con 56.5 m² y dos habitaciones en un formato eficiente. Con pocas unidades disponibles, es ideal para quienes buscan rentabilidad en arriendo o una segunda vivienda.',
+        precio: "$610'820.000",
+        area: '56.5 m²',
+        hab: '2',
+        banos: '0',
+        piso: '2do al 5to',
+        descripcion: 'El Apartamento Tipo G ofrece dos habitaciones en tan solo 56.5 m², gracias a un diseño inteligente que optimiza cada espacio. Es la opción perfecta para inversores que buscan alta rentabilidad en arriendo o para familias jóvenes con presupuesto ajustado. La distribución compacta no sacrifica funcionalidad: cuenta con sala-comedor integrados, cocina lineal y dos habitaciones bien dimensionadas. Quedan muy pocas unidades disponibles.',
+        imagenes: [
+          'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=1200&q=80',
+          'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=600&q=80',
+          'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80'
+        ],
+        caracteristicas: [
+          { icon: '📐', titulo: '56.5 m² construidos', sub: 'Distribución optimizada' },
+          { icon: '🛏', titulo: '2 Habitaciones', sub: 'Diseño compacto eficiente' },
+          { icon: '💡', titulo: 'Alta rentabilidad', sub: 'Ideal para inversión' },
+          { icon: '🍳', titulo: 'Cocina lineal', sub: 'Funcional y moderna' },
+          { icon: '📜', titulo: 'Planos incluidos', sub: 'Sin costo adicional' },
+          { icon: '⚡', titulo: 'Últimas unidades', sub: 'Disponibilidad limitada' }
+        ]
+      }
+    };
+
+    // ── VER DETALLE ──────────────────────────────────────────
+    function verDetalle(tipo) {
+      const d = lotes[tipo];
+      document.getElementById('vista-lista').style.display = 'none';
+      document.getElementById('vista-detalle').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Galería
+      document.getElementById('det-img-main').src = d.imagenes[0];
+      document.getElementById('det-img-t1').src   = d.imagenes[1];
+      document.getElementById('det-img-t2').src   = d.imagenes[2];
+      document.getElementById('det-badge').textContent = d.badge;
+
+      // Cabecera
+      document.getElementById('det-breadcrumb').textContent = d.nombre;
+      document.getElementById('det-tag').textContent        = d.tag;
+      document.getElementById('det-title').textContent      = d.nombre;
+      document.getElementById('det-subtitle').textContent   = d.subtitulo;
+
+      // Stats
+      document.getElementById('det-stats').innerHTML = `
+        <div class="stat-box"><div class="stat-icon">📐</div><div class="stat-value">${d.area}</div><div class="stat-label">Área total</div></div>
+        <div class="stat-box"><div class="stat-icon">🛏</div><div class="stat-value">${d.hab} Hab.</div><div class="stat-label">Habitaciones</div></div>
+        <div class="stat-box"><div class="stat-icon">🚿</div><div class="stat-value">${d.banos} Baños</div><div class="stat-label">Baños</div></div>
+        <div class="stat-box"><div class="stat-icon">💰</div><div class="stat-value">${d.precio}</div><div class="stat-label">Precio desde</div></div>
+      `;
+
+      // Descripción
+      document.getElementById('det-desc').textContent = d.descripcion;
+
+      // Características
+      document.getElementById('det-caract').innerHTML = d.caracteristicas.map(c => `
+        <div class="caract-item">
+          <span class="caract-icon">${c.icon}</span>
+          <div class="caract-text">${c.titulo}<span>${c.sub}</span></div>
+        </div>
+      `).join('');
+    }
+
+    // ── VOLVER A LISTA ───────────────────────────────────────
+    function volverLista() {
+      document.getElementById('vista-detalle').style.display = 'none';
+      document.getElementById('vista-lista').style.display   = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── FILTROS ──────────────────────────────────────────────
+    function filtrar(tipo, btn) {
+      document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.lote-card').forEach(card => {
+        const hab   = parseInt(card.dataset.hab);
+        const area  = parseInt(card.dataset.area);
+        let mostrar = true;
+        if (tipo === '1hab')    mostrar = hab === 1;
+        if (tipo === '2hab')    mostrar = hab === 2;
+        if (tipo === 'pequeno') mostrar = area <= 50;
+        if (tipo === 'grande')  mostrar = area > 50;
+        card.style.display = mostrar ? 'block' : 'none';
+      });
+    }
+    // Leer ?tipo= de la URL y abrir detalle automáticamente
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const tipo = params.get('tipo');
+  if (tipo && lotes[tipo]) verDetalle(tipo);
+});
+  </script>
+
 </body>
 </html>

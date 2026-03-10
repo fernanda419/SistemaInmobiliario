@@ -71,7 +71,14 @@
     .section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.9rem, 3.5vw, 2.8rem); font-weight: 900; color: var(--text-dark); text-align: center; margin-bottom: 8px; }
     .section-sub { text-align: center; color: var(--text-muted); font-size: 0.97rem; margin-bottom: 52px; }
     .cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
-    .property-card { background: var(--white); border-radius: 12px; padding: 28px 24px; border: 1px solid rgba(42,106,79,0.12); box-shadow: var(--shadow); transition: transform 0.25s, box-shadow 0.25s; }
+
+    /* ── ÚNICO CAMBIO DE ESTILO: cursor pointer en las tarjetas ── */
+    .property-card {
+      background: var(--white); border-radius: 12px; padding: 28px 24px;
+      border: 1px solid rgba(42,106,79,0.12); box-shadow: var(--shadow);
+      transition: transform 0.25s, box-shadow 0.25s;
+      cursor: pointer; text-decoration: none; display: block; color: inherit;
+    }
     .property-card:hover { transform: translateY(-4px); box-shadow: 0 8px 36px rgba(0,0,0,0.13); }
     .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
     .card-icon { font-size: 1.2rem; }
@@ -80,6 +87,11 @@
     .property-card ul li { font-size: 0.875rem; color: var(--text-muted); padding: 3px 0; }
     .property-card ul li strong { color: var(--text-dark); font-weight: 600; }
     .price { font-size: 1rem; font-weight: 700; color: var(--green-accent); }
+    .card-ver {
+      display: inline-block; margin-top: 14px;
+      font-size: 0.82rem; font-weight: 600; color: var(--green-mid);
+      transition: gap 0.2s;
+    }
 
     /* ETAPAS */
     .etapas { padding: 90px 60px; background: var(--cream-dark); }
@@ -131,7 +143,7 @@
     </ul>
     <div class="nav-actions">
       <a href="login.html" class="btn-link">Ingresar</a>
-      <a href="register.html" class="btn-primary">Registrarse</a>
+      <a href="registrar.html" class="btn-primary">Registrarse</a>
     </div>
   </nav>
 
@@ -146,7 +158,7 @@
         Planos habitacionales incluidos con tu compra.
       </p>
       <div class="hero-btns">
-        <a href="register.html" class="btn-primary">Reserva tu Lote &rarr;</a>
+        <a href="registrar.html" class="btn-primary">Reserva tu Lote &rarr;</a>
         <a href="#tipologias" class="btn-outline">Ver Tipologías</a>
       </div>
     </div>
@@ -177,7 +189,8 @@
     <p class="section-sub">Encuentra el espacio ideal para ti y tu familia</p>
     <div class="cards-grid">
 
-      <div class="property-card">
+      <!-- ✅ CAMBIO: cada tarjeta es un <a> que lleva a lotes.html con el tipo -->
+      <a href="lotes.html?tipo=C" class="property-card">
         <div class="card-header">
           <span class="card-icon">🏢</span>
           <h4>Apartamento Tipo C</h4>
@@ -188,9 +201,10 @@
           <li>Baños: <strong>1</strong></li>
         </ul>
         <p class="price">Desde $422'760.000</p>
-      </div>
+        <span class="card-ver">Ver detalle →</span>
+      </a>
 
-      <div class="property-card">
+      <a href="lotes.html?tipo=E" class="property-card">
         <div class="card-header">
           <span class="card-icon">🏢</span>
           <h4>Apartamento Tipo E</h4>
@@ -201,9 +215,10 @@
           <li>Baños: <strong>2</strong></li>
         </ul>
         <p class="price">Desde $739'066.800</p>
-      </div>
+        <span class="card-ver">Ver detalle →</span>
+      </a>
 
-      <div class="property-card">
+      <a href="lotes.html?tipo=F" class="property-card">
         <div class="card-header">
           <span class="card-icon">🏢</span>
           <h4>Apartamento Tipo F</h4>
@@ -214,9 +229,10 @@
           <li>Baños: <strong>2</strong></li>
         </ul>
         <p class="price">Desde $766'831.000</p>
-      </div>
+        <span class="card-ver">Ver detalle →</span>
+      </a>
 
-      <div class="property-card">
+      <a href="lotes.html?tipo=G" class="property-card">
         <div class="card-header">
           <span class="card-icon">🏢</span>
           <h4>Apartamento Tipo G</h4>
@@ -227,7 +243,8 @@
           <li>Baños: <strong>0</strong></li>
         </ul>
         <p class="price">Desde $610'820.000</p>
-      </div>
+        <span class="card-ver">Ver detalle →</span>
+      </a>
 
     </div>
   </section>
@@ -289,8 +306,8 @@
 
       <div class="footer-links">
         <h5>Enlaces</h5>
-        <a href="#">Iniciar Sesión</a>
-        <a href="#">Registrarse</a>
+        <a href="login.html">Iniciar Sesión</a>
+        <a href="registrar.html">Registrarse</a>
         <a href="#tipologias">Tipologías</a>
       </div>
 
